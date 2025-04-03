@@ -1,0 +1,23 @@
+{
+  "name": "api-interface-type",
+  "version": "1.0.0",
+  "description": "create api interface type",
+  "homepage": "https://github.com/n-daira/npm_pack-api_interface_type#readme",
+  "bugs": {
+    "url": "https://github.com/n-daira/npm_pack-api_interface_type/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-daira/npm_pack-api_interface_type.git"
+  },
+  "license": "MIT",
+  "author": "Sho Nakadaira",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "5.8.2"
+  }
+}
