@@ -2,12 +2,12 @@ type PrimitiveType = {
     type: 
         'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'time' | 'uuid' | 'mail' |
         'string?' | 'number?' | 'boolean?' | 'date?' | 'datetime?' | 'time?' | 'uuid?' | 'mail?';
-    description: string;
+    description?: string;
 };
 
 type ObjectType = {
     type: 'object' | 'object?';
-    description: string;
+    description?: string;
     properties: {
         [key: string]: PropertyType;
     };
@@ -15,8 +15,8 @@ type ObjectType = {
 
 type ArrayType = {
     type: 'array' | 'array?';
-    description: string;
-    properties: PropertyType;
+    description?: string;
+    item: PropertyType;
 };
 
 export type PropertyType = PrimitiveType | ObjectType | ArrayType;

@@ -8,19 +8,19 @@ declare module 'test-api-interface-type' {
 
         protected properties: { [key: string]: PropertyType; };
 
-        protected readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE: string;
-        protected readonly REQUIRED_ERROR_MESSAGE: string;
-        protected readonly UNNECESSARY_INPUT_ERROR_MESSAGE: string;
-        protected readonly INVALID_OBJECT_ERROR_MESSAGE: string;
-        protected readonly INVALID_ARRAY_ERROR_MESSAGE: string;
-        protected readonly INVALID_NUMBER_ERROR_MESSAGE: string;
-        protected readonly INVALID_BOOL_ERROR_MESSAGE: string;
-        protected readonly INVALID_STRING_ERROR_MESSAGE: string;
-        protected readonly INVALID_UUID_ERROR_MESSAGE: string;
-        protected readonly INVALID_MAIL_ERROR_MESSAGE: string;
-        protected readonly INVALID_DATE_ERROR_MESSAGE: string;
-        protected readonly INVALID_TIME_ERROR_MESSAGE: string;
-        protected readonly INVALID_DATETIME_ERROR_MESSAGE: string;
+        public readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE: string;
+        public readonly REQUIRED_ERROR_MESSAGE: string;
+        public readonly UNNECESSARY_INPUT_ERROR_MESSAGE: string;
+        public readonly INVALID_OBJECT_ERROR_MESSAGE: string;
+        public readonly INVALID_ARRAY_ERROR_MESSAGE: string;
+        public readonly INVALID_NUMBER_ERROR_MESSAGE: string;
+        public readonly INVALID_BOOL_ERROR_MESSAGE: string;
+        public readonly INVALID_STRING_ERROR_MESSAGE: string;
+        public readonly INVALID_UUID_ERROR_MESSAGE: string;
+        public readonly INVALID_MAIL_ERROR_MESSAGE: string;
+        public readonly INVALID_DATE_ERROR_MESSAGE: string;
+        public readonly INVALID_TIME_ERROR_MESSAGE: string;
+        public readonly INVALID_DATETIME_ERROR_MESSAGE: string;
         protected throwException(code: string, message: string): never;
 
         get Data(): { [key: string]: any };

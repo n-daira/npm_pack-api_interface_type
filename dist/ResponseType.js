@@ -28,7 +28,7 @@ class ResponseType extends ReqResType_1.default {
             if (this.Data[key] === undefined) {
                 continue;
             }
-            if (this.Data[key] === null) {
+            if (this.Data[key] === null || (property.type.replace("?", "") !== "string" && this.Data[key] === "")) {
                 data[key] = property.type.endsWith('?') ? null : undefined;
                 continue;
             }
@@ -63,7 +63,7 @@ class ResponseType extends ReqResType_1.default {
                 continue;
             }
             const property = properties[key];
-            if (data[key] === null) {
+            if (data[key] === null || (property.type.replace("?", "") !== "string" && data[key] === "")) {
                 resData[key] = property.type.endsWith('?') ? null : undefined;
                 continue;
             }

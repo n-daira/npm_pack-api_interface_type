@@ -1,5 +1,5 @@
 {
-  "name": "api-interface-type",
+  "name": "test-api-interface-type",
   "version": "1.0.0",
   "description": "create api interface type",
   "homepage": "https://github.com/n-daira/npm_pack-api_interface_type#readme",
@@ -16,7 +16,7 @@
   "main": "dist/index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "rm -rf dist/* && tsc && jest --runInBand --forceExit --detectOpenHandles"
+    "test": "rm -rf dist/* && tsc && jest"
   },
   "devDependencies": {
     "@types/express": "5.0.1",

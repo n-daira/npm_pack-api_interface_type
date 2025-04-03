@@ -9,19 +9,19 @@ export class RequestType extends ReqResType {
     // エラー文言
     // エラーメッセージの変更はサブクラスで行ってください
     // *****************************************
-    protected readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
-    protected readonly REQUIRED_ERROR_MESSAGE = '{property} is required.';
-    protected readonly UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
-    protected readonly INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
-    protected readonly INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
-    protected readonly INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
-    protected readonly INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
-    protected readonly INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
-    protected readonly INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
-    protected readonly INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
-    protected readonly INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
-    protected readonly INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
-    protected readonly INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
+    public readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
+    public readonly REQUIRED_ERROR_MESSAGE = '{property} is required.';
+    public readonly UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
+    public readonly INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
+    public readonly INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
+    public readonly INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
+    public readonly INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
+    public readonly INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
+    public readonly INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
+    public readonly INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
+    public readonly INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
+    public readonly INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
+    public readonly INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
 
     /**
      * Throws an exception with the given code and message.
@@ -143,10 +143,7 @@ export class RequestType extends ReqResType {
             // NULLチェック
             if (key in this.data === false || this.data[key] === null || this.data[key] === "") {
                 if (this.properties[key].type.endsWith('?')) {
-                    // nullの値入れる（undefinedはキー指定なし）
-                    if (this.data[key] === null || this.data[key] === "") {
-                        this.changeBody([key], null);
-                    }
+                    this.changeBody([key], null);
                     continue;
                 } else {
                     this.throwException("001", this.ErrorMessage("001", [key], ""));
@@ -171,7 +168,7 @@ export class RequestType extends ReqResType {
                         if (this.request.method === 'GET' || this.request.method === 'DELETE') {
                             // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                             // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
-                            this.data[key] = [this.convertValue(this.properties[key].properties.type, value, [key, 0])];
+                            this.data[key] = [this.convertValue(this.properties[key].item.type, value, [key, 0])];
                         } else {
                             this.throwException("003", this.ErrorMessage("003", [key], value));
                         }

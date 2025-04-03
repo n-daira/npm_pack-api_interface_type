@@ -134,10 +134,7 @@ class RequestType extends ReqResType_1.default {
             // NULLチェック
             if (key in this.data === false || this.data[key] === null || this.data[key] === "") {
                 if (this.properties[key].type.endsWith('?')) {
-                    // nullの値入れる（undefinedはキー指定なし）
-                    if (this.data[key] === null || this.data[key] === "") {
-                        this.changeBody([key], null);
-                    }
+                    this.changeBody([key], null);
                     continue;
                 }
                 else {
@@ -164,7 +161,7 @@ class RequestType extends ReqResType_1.default {
                         if (this.request.method === 'GET' || this.request.method === 'DELETE') {
                             // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                             // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
-                            this.data[key] = [this.convertValue(this.properties[key].properties.type, value, [key, 0])];
+                            this.data[key] = [this.convertValue(this.properties[key].item.type, value, [key, 0])];
                         }
                         else {
                             this.throwException("003", this.ErrorMessage("003", [key], value));
