@@ -7,10 +7,11 @@ const ReqResType_1 = __importDefault(require("./ReqResType"));
 class ResponseType extends ReqResType_1.default {
     constructor() {
         super(...arguments);
-        // **********************************************************************
-        // こちらは基底クラスで使用するものです
-        // **********************************************************************
-        this.data = {};
+        /**
+         * Property to store response data
+         * レスポンスデータを格納するためのプロパティ
+         */
+        this.Data = {};
         // /**
         //  * Swaggerのレスポンス定義を生成
         //  * @returns {string} Swagger形式のレスポンス定義
@@ -100,19 +101,20 @@ class ResponseType extends ReqResType_1.default {
         // }
     }
     /**
+     * Convert and retrieve data according to the type definition
      * 型定義に従ってデータを変換して取得
-     * @returns {Object.<string, any>} 変換されたデータ
+     * @returns {Object.<string, any>} Converted data, 変換されたデータ
      */
-    get Data() {
+    get ResponseData() {
         let data = {};
         for (const [key, property] of Object.entries(this.properties)) {
-            if (key in this.data === false) {
+            if (key in this.Data === false) {
                 continue;
             }
-            if (this.data[key] === undefined) {
+            if (this.Data[key] === undefined) {
                 continue;
             }
-            if (this.data[key] === null) {
+            if (this.Data[key] === null) {
                 data[key] = property.type.endsWith('?') ? null : undefined;
                 continue;
             }
@@ -133,9 +135,10 @@ class ResponseType extends ReqResType_1.default {
         return data;
     }
     /**
+     * Retrieve object type data
      * オブジェクト型のデータを取得
-     * @param {Array.<string|number>} keys - プロパティへのパス
-     * @returns {Object.<string, any>} 変換されたオブジェクトデータ
+     * @param {Array.<string|number>} keys - Path to the property, プロパティへのパス
+     * @returns {Object.<string, any>} Retrieved object data, 取得されたオブジェクトデータ
      */
     getObject(keys) {
         let resData = {};
@@ -167,9 +170,10 @@ class ResponseType extends ReqResType_1.default {
         return resData;
     }
     /**
+     * Retrieve array type data
      * 配列型のデータを取得
-     * @param {Array.<string|number>} keys - プロパティへのパス
-     * @returns {Array<any>|undefined} 変換された配列データ
+     * @param {Array.<string|number>} keys - Path to the property, プロパティへのパス
+     * @returns {Array<any> | undefined} Retrieved array data, 取得された配列データ
      */
     getArray(keys) {
         const data = this.getData(keys);
@@ -196,9 +200,10 @@ class ResponseType extends ReqResType_1.default {
         return resData;
     }
     /**
-     * 指定されたパスのプロパティ定義を取得
-     * @param {Array.<string|number>} keys - プロパティへのパス
-     * @returns {BaseType} プロパティの型定義
+     * Retrieve property type data
+     * プロパティ型のデータを取得
+     * @param {Array.<string|number>} keys - Path to the property, プロパティへのパス
+     * @returns {any} Retrieved property data, 取得されたプロパティデータ
      */
     getProperty(keys) {
         let property = this.properties;
@@ -218,12 +223,13 @@ class ResponseType extends ReqResType_1.default {
         return property;
     }
     /**
-     * 指定されたパスのデータを取得
-     * @param {Array.<string|number>} keys - プロパティへのパス
-     * @returns {any} 取得したデータ
+     * Retrieve data based on the provided keys
+     * 指定されたキーに基づいてデータを取得
+     * @param {Array.<string|number>} keys - Path to the data, データへのパス
+     * @returns {any} Retrieved data, 取得されたデータ
      */
     getData(keys) {
-        let data = this.data;
+        let data = this.Data;
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
             if (typeof key === 'number') {
@@ -235,9 +241,10 @@ class ResponseType extends ReqResType_1.default {
         return data;
     }
     /**
-     * プリミティブ値を型定義に従って変換
-     * @param {Array.<string|number>} keys - プロパティへのパス
-     * @returns {(string|number|boolean|null|undefined)} 変換された値
+     * Retrieve value based on the provided keys
+     * 指定されたキーに基づいて値を取得
+     * @param {Array.<string|number>} keys - Path to the value, 値へのパス
+     * @returns {string | number | boolean | null | undefined} Retrieved value, 取得された値
      */
     getValue(keys) {
         const property = this.getProperty(keys);

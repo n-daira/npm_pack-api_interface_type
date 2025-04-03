@@ -89,14 +89,18 @@ class RequestType extends ReqResType_1.default {
         this.request = req;
     }
     /**
+     * Sets the values of the request body to the class properties.
      * リクエストボディの値をクラスのプロパティにセットします。
      *
+     * Note: This method is implemented as a separate method rather than in the constructor.
+     * This is because if executed in the constructor, the properties of the inheriting class
+     * are not yet initialized, and the values cannot be set correctly.
      * 注意: このメソッドはコンストラクタではなく別メソッドとして実装されています。
      * これは、コンストラクタ内で実行すると継承先のクラスのプロパティが
      * まだ初期化されていないため、正しく値をセットできないためです。
      *
-     * @param {Object} body - リクエストボディオブジェクト
-     * @throws {InputErrorException} 入力値が不正な場合にスローされます
+     * @param {Object} body - Request body object, リクエストボディオブジェクト
+     * @throws {InputErrorException} Thrown when the input value is invalid, 入力値が不正な場合にスローされます
      */
     createBody() {
         if (this.request.method === 'GET' || this.request.method === 'DELETE') {
@@ -163,12 +167,17 @@ class RequestType extends ReqResType_1.default {
         }
     }
     /**
+     * Recursively processes array type values.
+     * Validates each element of the array and converts it to the appropriate type.
      * 配列型の値を再帰的に処理します。
      * 配列の各要素を検証し、適切な型に変換します。
      *
-     * @param {Array<string | number>} keys - 現在の処理パス（文字列またはインデックス番号の配列）
-     * @param {any[]} values - 処理対象の配列
-     * @throws {InputErrorException} 配列要素の型が不正な場合にスローされます
+     * @param {Array<string | number>} keys - Current processing path (array of strings or index numbers)
+     * 現在の処理パス（文字列またはインデックス番号の配列）
+     * @param {any[]} values - Array to be processed
+     * 処理対象の配列
+     * @throws {InputErrorException} Thrown when the type of an array element is invalid
+     * 配列要素の型が不正な場合にスローされます
      */
     setArray(keys, values) {
         const property = this.getProperty(keys);
@@ -189,9 +198,12 @@ class RequestType extends ReqResType_1.default {
         }
     }
     /**
+     * Retrieve the property definition corresponding to the specified key path.
      * 指定されたキーパスに対応するプロパティ定義を取得します。
-     * @param {Array<string | number>} keys - プロパティへのアクセスパス（文字列またはインデックス番号の配列）
-     * @returns {BaseType} プロパティ定義オブジェクト
+     * @param {Array<string | number>} keys - Access path to the property (array of strings or index numbers)
+     * プロパティへのアクセスパス（文字列またはインデックス番号の配列）
+     * @returns {BaseType} Property definition object
+     * プロパティ定義オブジェクト
      */
     getProperty(keys) {
         let property = this.properties;
@@ -211,10 +223,14 @@ class RequestType extends ReqResType_1.default {
         return property;
     }
     /**
+     * Set the value of the request body to the specified path.
+     * Automatically create intermediate objects or arrays as needed.
      * リクエストボディの値を指定されたパスに設定します。
      * 必要に応じて中間のオブジェクトや配列を自動的に作成します。
-     * @param {Array<string | number>} keys - 設定先へのパス（文字列またはインデックス番号の配列）
-     * @param {any} value - 設定する値
+     * @param {Array<string | number>} keys - Path to the destination (array of strings or index numbers)
+     * 設定先へのパス（文字列またはインデックス番号の配列）
+     * @param {any} value - Value to be set
+     * 設定する値
      */
     changeBody(keys, value) {
         let body = this.data;
@@ -232,11 +248,16 @@ class RequestType extends ReqResType_1.default {
         body[keys[keys.length - 1]] = value;
     }
     /**
+     * Process object type values recursively.
+     * Validate object properties and convert them to appropriate types.
      * オブジェクト型の値を再帰的に処理します。
      * オブジェクトのプロパティを検証し、適切な型に変換します。
-     * @param {Array<string | number>} keys - 現在の処理パス（文字列またはインデックス番号の配列）
-     * @param {object} values - 処理対象のオブジェクト
-     * @throws {InputErrorException} プロパティの型が不正な場合にスローされます
+     * @param {Array<string | number>} keys - Current processing path (array of strings or index numbers)
+     * 現在の処理パス（文字列またはインデックス番号の配列）
+     * @param {object} values - Object to be processed
+     * 処理対象のオブジェクト
+     * @throws {InputErrorException} Thrown when the property type is invalid
+     * プロパティの型が不正な場合にスローされます
      */
     setObject(keys, values) {
         const property = this.getProperty(keys);
@@ -287,14 +308,19 @@ class RequestType extends ReqResType_1.default {
         }
     }
     /**
+     * Convert the input value based on the specified type.
+     * Throws an exception if type conversion fails.
      * 指定された型に基づいて入力値を変換します。
      * 型変換に失敗した場合は例外をスローします。
      *
-     * @param {string} type - 変換する型（例: 'number', 'boolean', 'string', 'date', 'time', 'datetime'）
-     * @param {any} value - 変換する値
-     * @param {Array<string | number>} keys - 処理対象のパス（文字列またはインデックス番号の配列）
-     * @returns {any} 変換された値
-     * @throws {InputErrorException} 型変換に失敗した場合にスローされます
+     * @param {string} type - The type to convert to (e.g., 'number', 'boolean', 'string', 'date', 'time', 'datetime')
+     *                        変換する型（例: 'number', 'boolean', 'string', 'date', 'time', 'datetime'）
+     * @param {any} value - The value to convert
+     *                      変換する値
+     * @param {Array<string | number>} keys - The path to the target (array of strings or index numbers)
+     *                                        処理対象のパス（文字列またはインデックス番号の配列）
+     * @returns {any} The converted value, 変換された値
+     * @throws {InputErrorException} Thrown if type conversion fails, 型変換に失敗した場合にスローされます
      */
     convertValue(type, value, keys) {
         switch (type) {
@@ -372,11 +398,16 @@ class RequestType extends ReqResType_1.default {
         return value;
     }
     /**
+     * Convert the input value to the specified type.
+     * Throws an exception if type conversion fails.
      * 入力値を指定された型に変換します。
      * 型変換に失敗した場合は例外をスローします。
-     * @param {Array<string | number>} keys - 処理対象のパス（文字列またはインデックス番号の配列）
-     * @param {any} value - 変換する値
-     * @throws {InputErrorException} 型変換に失敗した場合にスローされます
+     * @param {Array<string | number>} keys - Path to the target (array of strings or index numbers)
+     * 処理対象のパス（文字列またはインデックス番号の配列）
+     * @param {any} value - Value to be converted
+     * 変換する値
+     * @throws {InputErrorException} Thrown when type conversion fails
+     * 型変換に失敗した場合にスローされます
      */
     convertInput(keys, value) {
         const property = this.getProperty(keys);
