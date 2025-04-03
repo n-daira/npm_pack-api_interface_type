@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import ReqResType from "./ReqResType";
 
-export default class RequestType extends ReqResType {
+export class RequestType extends ReqResType {
 
     // *****************************************
     // Input Error Message
@@ -9,19 +9,19 @@ export default class RequestType extends ReqResType {
     // エラー文言
     // エラーメッセージの変更はサブクラスで行ってください
     // *****************************************
-    public static INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
-    public static REQUIRED_ERROR_MESSAGE = '{property} is required.';
-    public static UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
-    public static INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
-    public static INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
-    public static INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
-    public static INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
-    public static INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
-    public static INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
-    public static INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
-    public static INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
-    public static INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
-    public static INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
+    protected readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
+    protected readonly REQUIRED_ERROR_MESSAGE = '{property} is required.';
+    protected readonly UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
+    protected readonly INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
+    protected readonly INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
+    protected readonly INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
+    protected readonly INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
+    protected readonly INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
+    protected readonly INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
+    protected readonly INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
+    protected readonly INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
+    protected readonly INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
+    protected readonly INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
 
     /**
      * Throws an exception with the given code and message.
@@ -35,55 +35,13 @@ export default class RequestType extends ReqResType {
         throw new Error(`${code}: ${message}`);
     }
 
-    /**
-     * Generates an error message based on the provided code, keys, and value.
-     * 指定されたコード、キー、および値に基づいてエラーメッセージを生成します。
-     * @param {string} code - The error code. エラーコード
-     * @param {Array<string | number>} keys - The keys indicating the property path. プロパティパスを示すキー
-     * @param {any} value - The value that caused the error. エラーを引き起こした値
-     * @returns {string} The generated error message. 生成されたエラーメッセージ
-     */
-    private ErrorMessage(code: "990" | "001" | "002" | "003" | "004" | "101" | "102" | "103" | "104" |
-        "201" | "211" | "212" | "213" | "221" | "231" | "241" | "251" | "252" |
-        "261" | "271" | "272", keys: Array<string | number>, value: any): string {
-        const list = {
-            "990": RequestType.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
-            "001": RequestType.REQUIRED_ERROR_MESSAGE,
-            "101": RequestType.REQUIRED_ERROR_MESSAGE,
-            "002": RequestType.INVALID_OBJECT_ERROR_MESSAGE,
-            "102": RequestType.INVALID_OBJECT_ERROR_MESSAGE,
-            "003": RequestType.INVALID_ARRAY_ERROR_MESSAGE,
-            "103": RequestType.INVALID_ARRAY_ERROR_MESSAGE,
-            "004": RequestType.UNNECESSARY_INPUT_ERROR_MESSAGE,
-            "104": RequestType.UNNECESSARY_INPUT_ERROR_MESSAGE,
-            "201": RequestType.INVALID_NUMBER_ERROR_MESSAGE,
-            "211": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "212": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "213": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "221": RequestType.INVALID_STRING_ERROR_MESSAGE,
-            "231": RequestType.INVALID_UUID_ERROR_MESSAGE,
-            "241": RequestType.INVALID_MAIL_ERROR_MESSAGE,
-            "251": RequestType.INVALID_DATE_ERROR_MESSAGE,
-            "252": RequestType.INVALID_DATE_ERROR_MESSAGE,
-            "261": RequestType.INVALID_TIME_ERROR_MESSAGE,
-            "271": RequestType.INVALID_DATETIME_ERROR_MESSAGE,
-            "272": RequestType.INVALID_DATETIME_ERROR_MESSAGE,
-        }
-        return list[code].replace("{property}", keys.join('.')).replace("{value}", value);
-    }
-
-    // **********************************************************************
-    // こちらは基底クラスで使用するものです
-    // **********************************************************************
-    private data?: {[key: string]: any};
     get Data(): {[key: string]: any} {
         if (this.data === undefined) {
             this.createBody();
         }
-        return this.data || {};
+        return this.data ?? {};
     }
-    get Headers(): {[key: string]: any} { return this.request.headers; }
-    private params?: {[key: string]: any};
+    get Headers(): IncomingHttpHeaders { return this.request.headers; }
     get Params():  {[key: string]: any} {
         if (this.params === undefined) {
             for (const [key, value] of Object.entries(this.request.params)) {
@@ -97,28 +55,60 @@ export default class RequestType extends ReqResType {
         this.params = this.request.params;
         return this.params;
     }
-
-
-    private request: Request;
-
-    // get IpAddress(): string | null { return this.request.socket.remoteAddress || null; }
-    // get UserAgent(): string { return this.request.headers['user-agent'] as string; }
-    // get Language(): string { return this.request.headers['accept-language'] as string; }
-    // get AcceptHeader(): string { return this.request.headers['accept'] as string; }
-    // get Accept(): string { return this.request.headers['accept'] as string; }
-    // get Referer(): string { return this.request.headers['referer'] as string; }
-    // get Cookies(): { [key: string]: string } { 
-    //     const cookieStr = this.request.headers['cookie'] || '';
-    //     return cookieStr.split(';').reduce((acc: { [key: string]: string }, cookie) => {
-    //             const [key, value] = cookie.split('=').map(part => part.trim());
-    //             acc[key] = value;
-    //         return acc;
-    //     }, {} as { [key: string]: string }); 
-    // }
+    get RemoteAddress(): string | undefined { return this.request.socket.remoteAddress; }
+    get Authorization(): string | null { 
+        const authorization = this.Headers['authorization'] ?? '';
+        if (authorization.startsWith('Bearer ') === false) {
+            return null;
+        }
+        return authorization.replace(/^Bearer\s/, '');
+    }
+    get Req(): Request { return this.request; }
 
     constructor(req: Request) {
         super();
         this.request = req;
+    }
+
+    private data?: {[key: string]: any};
+    private params?: {[key: string]: any};
+    private request: Request;
+
+    /**
+     * Generates an error message based on the provided code, keys, and value.
+     * 指定されたコード、キー、および値に基づいてエラーメッセージを生成します。
+     * @param {string} code - The error code. エラーコード
+     * @param {Array<string | number>} keys - The keys indicating the property path. プロパティパスを示すキー
+     * @param {any} value - The value that caused the error. エラーを引き起こした値
+     * @returns {string} The generated error message. 生成されたエラーメッセージ
+     */
+    private ErrorMessage(code: "990" | "001" | "002" | "003" | "004" | "101" | "102" | "103" | "104" |
+        "201" | "211" | "212" | "213" | "221" | "231" | "241" | "251" | "252" |
+        "261" | "271" | "272", keys: Array<string | number>, value: any): string {
+        const list = {
+            "990": this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
+            "001": this.REQUIRED_ERROR_MESSAGE,
+            "101": this.REQUIRED_ERROR_MESSAGE,
+            "002": this.INVALID_OBJECT_ERROR_MESSAGE,
+            "102": this.INVALID_OBJECT_ERROR_MESSAGE,
+            "003": this.INVALID_ARRAY_ERROR_MESSAGE,
+            "103": this.INVALID_ARRAY_ERROR_MESSAGE,
+            "004": this.UNNECESSARY_INPUT_ERROR_MESSAGE,
+            "104": this.UNNECESSARY_INPUT_ERROR_MESSAGE,
+            "201": this.INVALID_NUMBER_ERROR_MESSAGE,
+            "211": this.INVALID_BOOL_ERROR_MESSAGE,
+            "212": this.INVALID_BOOL_ERROR_MESSAGE,
+            "213": this.INVALID_BOOL_ERROR_MESSAGE,
+            "221": this.INVALID_STRING_ERROR_MESSAGE,
+            "231": this.INVALID_UUID_ERROR_MESSAGE,
+            "241": this.INVALID_MAIL_ERROR_MESSAGE,
+            "251": this.INVALID_DATE_ERROR_MESSAGE,
+            "252": this.INVALID_DATE_ERROR_MESSAGE,
+            "261": this.INVALID_TIME_ERROR_MESSAGE,
+            "271": this.INVALID_DATETIME_ERROR_MESSAGE,
+            "272": this.INVALID_DATETIME_ERROR_MESSAGE,
+        }
+        return list[code].replace("{property}", keys.join('.')).replace("{value}", value);
     }
 
     /**
@@ -305,13 +295,10 @@ export default class RequestType extends ReqResType {
 
         for (const key of Object.keys(property.properties)) {
 
-            // NULLチェック
+            // NULL Check
             if (key in values === false || values[key] === null || values[key] === "") {
                 if (property.properties[key].type.endsWith('?')) {
-                    // nullの値入れる（undefinedはキー指定なし）
-                    if (values[key] === null || values[key] === "") {
-                        this.changeBody([...keys, key], null);
-                    }
+                    this.changeBody([...keys, key], null);
                     continue;
                 } else {
                     this.throwException("101", this.ErrorMessage("101", [...keys, key], ""));
@@ -342,7 +329,7 @@ export default class RequestType extends ReqResType {
             }
         }
 
-        // 不要項目チェック
+        // unnecessary input check
         for (const [key, value] of Object.entries(values)) {
             if (key in property.properties === false) {
                 this.throwException("104", this.ErrorMessage("104", [...keys, key], value));
@@ -461,139 +448,71 @@ export default class RequestType extends ReqResType {
         const property = this.getProperty(keys);
         this.changeBody(keys, this.convertValue(property.type, value, keys));
     }
+}
 
-    // /**
-    //  * リクエストボディからSwaggerのYAML定義を生成します。
-    //  * 
-    //  * @returns {string} Swagger形式のYAML定義
-    //  */
-    // public createSwagger(method: MethodType) {
-
-    //     if (method === 'get' || method === 'delete') {
-
-    //         const tabCount = 4;
-    //         const space = '  '.repeat(tabCount);
-
-    //         let ymlString = '';
-    //         for (const [key, property] of Object.entries(this.properties)) {
-    //             ymlString += `${space}- name: ${key}\n`;
-    //             ymlString += `${space}  in: query\n`;
-    //             ymlString += `${space}  description: ${property.description}\n`;
-    //             ymlString += `${space}  required: ${property.type.endsWith('?') ? 'false' : 'true'}\n`;
-    //             ymlString += `${space}  schema:\n`;
-    //             ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //         }
-
-    //         return ymlString;
-    //     } else {
-    //         const tabCount = 8;
-    //         const space = '  '.repeat(tabCount);
-    //         let componentYml = '\n';
-    //         let requiredList: Array<string> = [];
-    //         for (const [key, property] of Object.entries(this.properties)) {
-    
-    //             if (property.type.endsWith('?') === false) {
-    //                 requiredList.push(key);
-    //             }
-    
-    //             componentYml += `${space}${key}:\n`;
-    //             componentYml += `  ${space}type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //             componentYml += `  ${space}description: ${property.description}\n`;
-    
-    //             switch (property.type) {
-    //                 case 'object':
-    //                 case 'object?':
-    //                     componentYml += this.makeSwaggerProperyFromObject([key], tabCount + 1);
-    //                     break;
-    //                 case 'array':
-    //                 case 'array?':
-    //                     componentYml += this.makeSwaggerPropertyFromArray([key], tabCount + 1);
-    //                     break;
-    //             }
-    //         }
-    
-    //         if (requiredList.length > 0) {
-    //             componentYml += `              required:\n`;
-    //             componentYml += `                - ${requiredList.join(`\n                - `)}\n`;
-    //         }
-    
-    //         let ymlString = `      requestBody:\n`;
-    //         ymlString += `        content:\n`;
-    //         ymlString += `          application/json:\n`;
-    //         ymlString += `            schema:\n`;
-    //         ymlString += `              type: object\n`;
-    //         ymlString += `              properties:${componentYml}`;
-    //         ymlString += `          application/x-www-form-urlencoded:\n`;
-    //         ymlString += `            schema:\n`;
-    //         ymlString += `              type: object\n`;
-    //         ymlString += `              properties:${componentYml}`;
-
-    //         return ymlString;
-    //     }
-    // }
-
-
-    // /**
-    //  * オブジェクト型のプロパティからSwaggerのプロパティを生成
-    //  * @param {Array.<string|number>} keys - プロパティへのパス
-    //  * @returns {string} Swagger形式のプロパティ定義
-    //  */
-    // private makeSwaggerProperyFromObject(keys: Array<string | number>, tabCount: number): string {
-
-    //     const space = '  '.repeat(tabCount);
-
-    //     let ymlString = `${space}properties:\n`;
-
-    //     const properties = this.getProperty(keys).properties;
-    //     for (const key of Object.keys(properties)) {
-    //         const property = properties[key];
-
-            
-    //         ymlString += `${space}  ${key}:\n`;
-    //         ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //         ymlString += `${space}    description: ${property.description}\n`;
-
-    //         switch (property.type) {
-    //             case 'object':
-    //             case 'object?':
-    //                 ymlString += this.makeSwaggerProperyFromObject([...keys, key], tabCount + 2);
-    //                 break;
-    //             case 'array':
-    //             case 'array?':
-    //                 ymlString += this.makeSwaggerPropertyFromArray([...keys, key], tabCount + 2);
-    //                 break;
-    //         }
-    //     }
-
-    //     return ymlString;
-    // }
-
-    // /**
-    //  * 配列型のプロパティからSwaggerのプロパティを生成
-    //  * @param {Array.<string|number>} keys - プロパティへのパス
-    //  * @returns {string} Swagger形式のプロパティ定義
-    //  */
-    // private makeSwaggerPropertyFromArray(keys: Array<string | number>, tabCount: number): string {
-
-    //     const property = this.getProperty(keys).properties;
-
-    //     const space = '  '.repeat(tabCount);
-
-    //     let ymlString = `${space}items:\n`;
-    //     ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //     ymlString += `${space}  description: ${property.description}\n`;
-
-    //     switch (property.type) {
-    //         case 'object':
-    //         case 'object?':
-    //             ymlString += this.makeSwaggerProperyFromObject([...keys, 0], tabCount + 1);
-    //             break;
-    //         case 'array':
-    //         case 'array?':
-    //             ymlString += this.makeSwaggerPropertyFromArray([...keys, 0], tabCount + 1);
-    //             break;
-    //     }
-
-    //     return ymlString;
-    // }
+// Requestのheaderで定義されているIFをそのまま拝借
+export interface IncomingHttpHeaders extends NodeJS.Dict<string | string[]> {
+    accept?: string | undefined;
+    "accept-language"?: string | undefined;
+    "accept-patch"?: string | undefined;
+    "accept-ranges"?: string | undefined;
+    "access-control-allow-credentials"?: string | undefined;
+    "access-control-allow-headers"?: string | undefined;
+    "access-control-allow-methods"?: string | undefined;
+    "access-control-allow-origin"?: string | undefined;
+    "access-control-expose-headers"?: string | undefined;
+    "access-control-max-age"?: string | undefined;
+    "access-control-request-headers"?: string | undefined;
+    "access-control-request-method"?: string | undefined;
+    age?: string | undefined;
+    allow?: string | undefined;
+    "alt-svc"?: string | undefined;
+    authorization?: string | undefined;
+    "cache-control"?: string | undefined;
+    connection?: string | undefined;
+    "content-disposition"?: string | undefined;
+    "content-encoding"?: string | undefined;
+    "content-language"?: string | undefined;
+    "content-length"?: string | undefined;
+    "content-location"?: string | undefined;
+    "content-range"?: string | undefined;
+    "content-type"?: string | undefined;
+    cookie?: string | undefined;
+    date?: string | undefined;
+    etag?: string | undefined;
+    expect?: string | undefined;
+    expires?: string | undefined;
+    forwarded?: string | undefined;
+    from?: string | undefined;
+    host?: string | undefined;
+    "if-match"?: string | undefined;
+    "if-modified-since"?: string | undefined;
+    "if-none-match"?: string | undefined;
+    "if-unmodified-since"?: string | undefined;
+    "last-modified"?: string | undefined;
+    location?: string | undefined;
+    origin?: string | undefined;
+    pragma?: string | undefined;
+    "proxy-authenticate"?: string | undefined;
+    "proxy-authorization"?: string | undefined;
+    "public-key-pins"?: string | undefined;
+    range?: string | undefined;
+    referer?: string | undefined;
+    "retry-after"?: string | undefined;
+    "sec-websocket-accept"?: string | undefined;
+    "sec-websocket-extensions"?: string | undefined;
+    "sec-websocket-key"?: string | undefined;
+    "sec-websocket-protocol"?: string | undefined;
+    "sec-websocket-version"?: string | undefined;
+    "set-cookie"?: string[] | undefined;
+    "strict-transport-security"?: string | undefined;
+    tk?: string | undefined;
+    trailer?: string | undefined;
+    "transfer-encoding"?: string | undefined;
+    upgrade?: string | undefined;
+    "user-agent"?: string | undefined;
+    vary?: string | undefined;
+    via?: string | undefined;
+    warning?: string | undefined;
+    "www-authenticate"?: string | undefined;
 }

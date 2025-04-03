@@ -1,6 +1,6 @@
 import ReqResType from "./ReqResType";
 
-export default class ResponseType extends ReqResType {
+export class ResponseType extends ReqResType {
 
     /**
      * Property to store response data
@@ -275,108 +275,4 @@ export default class ResponseType extends ReqResType {
                 return undefined;
         }
     }
-
-    // /**
-    //  * Swaggerのレスポンス定義を生成
-    //  * @returns {string} Swagger形式のレスポンス定義
-    //  */
-    // public createSwagger(): string {
-    //     let ymlString = `      responses:
-    //     '200':
-    //       description: 成功事レスポンス
-    //       content:
-    //         application/json:
-    //           schema:
-    //             type: object
-    //             properties:`;
-
-    //     if (Object.keys(this.properties).length === 0) {
-    //         ymlString += ' {}\n'
-    //         return ymlString;
-    //     }
-
-    //     ymlString += `\n`;
-
-    //     let tabCount = 9;
-    //     const space = '  '.repeat(tabCount);
-    //     for (const [key, property] of Object.entries(this.properties)) {
-
-    //         ymlString += `${space}${key}:\n`;
-    //         ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //         ymlString += `${space}  description: ${property.description}\n`;
-    //         switch (property.type) {
-    //             case 'object':
-    //             case 'object?':
-    //                 ymlString += this.makeSwaggerProperyFromObject([key], tabCount + 1);
-    //                 break;
-    //             case 'array':
-    //             case 'array?':
-    //                 ymlString += this.makeSwaggerPropertyFromArray([key], tabCount + 1);
-    //                 break;
-    //         }
-    //     }
-
-    //     return ymlString;
-    // }
-
-    // /**
-    //  * オブジェクト型のプロパティからSwaggerのプロパティを生成
-    //  * @param {Array.<string|number>} keys - プロパティへのパス
-    //  * @returns {string} Swagger形式のプロパティ定義
-    //  */
-    // private makeSwaggerProperyFromObject(keys: Array<string | number>, tabCount: number): string {
-
-    //     const space = '  '.repeat(tabCount);
-    //     let ymlString = `${space}properties:\n`;
-
-    //     const properties = this.getProperty(keys).properties;
-    //     for (const key of Object.keys(properties)) {
-    //         const property = properties[key];
-
-    //         ymlString += `${space}  ${key}:\n`;
-    //         ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //         ymlString += `${space}    description: ${property.description}\n`;
-
-    //         switch (property.type) {
-    //             case 'object':
-    //             case 'object?':
-    //                 ymlString += this.makeSwaggerProperyFromObject([...keys, key], tabCount + 2);
-    //                 break;
-    //             case 'array':
-    //             case 'array?':
-    //                 ymlString += this.makeSwaggerPropertyFromArray([...keys, key], tabCount + 2);
-    //                 break;
-    //         }
-    //     }
-
-    //     return ymlString;
-    // }
-
-    // /**
-    //  * 配列型のプロパティからSwaggerのプロパティを生成
-    //  * @param {Array.<string|number>} keys - プロパティへのパス
-    //  * @returns {string} Swagger形式のプロパティ定義
-    //  */
-    // private makeSwaggerPropertyFromArray(keys: Array<string | number>, tabCount: number): string {
-
-    //     const property = this.getProperty(keys).properties;
-    //     const space = '  '.repeat(tabCount);
-
-    //     let ymlString = `${space}items:\n`;
-    //     ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
-    //     ymlString += `${space}  description: ${property.description}\n`;
-
-    //     switch (property.type) {
-    //         case 'object':
-    //         case 'object?':
-    //             ymlString += this.makeSwaggerProperyFromObject([...keys, 0], tabCount + 1);
-    //             break;
-    //         case 'array':
-    //         case 'array?':
-    //             ymlString += this.makeSwaggerPropertyFromArray([...keys, 0], tabCount + 1);
-    //             break;
-    //     }
-
-    //     return ymlString;
-    // }
 }

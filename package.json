@@ -13,7 +13,8 @@
   "license": "MIT",
   "author": "Sho Nakadaira",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "rm -rf dist/* && tsc && jest --runInBand --forceExit --detectOpenHandles"
   },

@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RequestType = void 0;
 const ReqResType_1 = __importDefault(require("./ReqResType"));
 class RequestType extends ReqResType_1.default {
     /**
@@ -16,45 +17,12 @@ class RequestType extends ReqResType_1.default {
     throwException(code, message) {
         throw new Error(`${code}: ${message}`);
     }
-    /**
-     * Generates an error message based on the provided code, keys, and value.
-     * 指定されたコード、キー、および値に基づいてエラーメッセージを生成します。
-     * @param {string} code - The error code. エラーコード
-     * @param {Array<string | number>} keys - The keys indicating the property path. プロパティパスを示すキー
-     * @param {any} value - The value that caused the error. エラーを引き起こした値
-     * @returns {string} The generated error message. 生成されたエラーメッセージ
-     */
-    ErrorMessage(code, keys, value) {
-        const list = {
-            "990": RequestType.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
-            "001": RequestType.REQUIRED_ERROR_MESSAGE,
-            "101": RequestType.REQUIRED_ERROR_MESSAGE,
-            "002": RequestType.INVALID_OBJECT_ERROR_MESSAGE,
-            "102": RequestType.INVALID_OBJECT_ERROR_MESSAGE,
-            "003": RequestType.INVALID_ARRAY_ERROR_MESSAGE,
-            "103": RequestType.INVALID_ARRAY_ERROR_MESSAGE,
-            "004": RequestType.UNNECESSARY_INPUT_ERROR_MESSAGE,
-            "104": RequestType.UNNECESSARY_INPUT_ERROR_MESSAGE,
-            "201": RequestType.INVALID_NUMBER_ERROR_MESSAGE,
-            "211": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "212": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "213": RequestType.INVALID_BOOL_ERROR_MESSAGE,
-            "221": RequestType.INVALID_STRING_ERROR_MESSAGE,
-            "231": RequestType.INVALID_UUID_ERROR_MESSAGE,
-            "241": RequestType.INVALID_MAIL_ERROR_MESSAGE,
-            "251": RequestType.INVALID_DATE_ERROR_MESSAGE,
-            "252": RequestType.INVALID_DATE_ERROR_MESSAGE,
-            "261": RequestType.INVALID_TIME_ERROR_MESSAGE,
-            "271": RequestType.INVALID_DATETIME_ERROR_MESSAGE,
-            "272": RequestType.INVALID_DATETIME_ERROR_MESSAGE,
-        };
-        return list[code].replace("{property}", keys.join('.')).replace("{value}", value);
-    }
     get Data() {
+        var _a;
         if (this.data === undefined) {
             this.createBody();
         }
-        return this.data || {};
+        return (_a = this.data) !== null && _a !== void 0 ? _a : {};
     }
     get Headers() { return this.request.headers; }
     get Params() {
@@ -70,23 +38,72 @@ class RequestType extends ReqResType_1.default {
         this.params = this.request.params;
         return this.params;
     }
-    // get IpAddress(): string | null { return this.request.socket.remoteAddress || null; }
-    // get UserAgent(): string { return this.request.headers['user-agent'] as string; }
-    // get Language(): string { return this.request.headers['accept-language'] as string; }
-    // get AcceptHeader(): string { return this.request.headers['accept'] as string; }
-    // get Accept(): string { return this.request.headers['accept'] as string; }
-    // get Referer(): string { return this.request.headers['referer'] as string; }
-    // get Cookies(): { [key: string]: string } { 
-    //     const cookieStr = this.request.headers['cookie'] || '';
-    //     return cookieStr.split(';').reduce((acc: { [key: string]: string }, cookie) => {
-    //             const [key, value] = cookie.split('=').map(part => part.trim());
-    //             acc[key] = value;
-    //         return acc;
-    //     }, {} as { [key: string]: string }); 
-    // }
+    get RemoteAddress() { return this.request.socket.remoteAddress; }
+    get Authorization() {
+        var _a;
+        const authorization = (_a = this.Headers['authorization']) !== null && _a !== void 0 ? _a : '';
+        if (authorization.startsWith('Bearer ') === false) {
+            return null;
+        }
+        return authorization.replace(/^Bearer\s/, '');
+    }
+    get Req() { return this.request; }
     constructor(req) {
         super();
+        // *****************************************
+        // Input Error Message
+        // Please make changes to error messages in the subclass
+        // エラー文言
+        // エラーメッセージの変更はサブクラスで行ってください
+        // *****************************************
+        this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
+        this.REQUIRED_ERROR_MESSAGE = '{property} is required.';
+        this.UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
+        this.INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
+        this.INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
+        this.INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
+        this.INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
+        this.INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
+        this.INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
+        this.INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
+        this.INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
+        this.INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
+        this.INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
         this.request = req;
+    }
+    /**
+     * Generates an error message based on the provided code, keys, and value.
+     * 指定されたコード、キー、および値に基づいてエラーメッセージを生成します。
+     * @param {string} code - The error code. エラーコード
+     * @param {Array<string | number>} keys - The keys indicating the property path. プロパティパスを示すキー
+     * @param {any} value - The value that caused the error. エラーを引き起こした値
+     * @returns {string} The generated error message. 生成されたエラーメッセージ
+     */
+    ErrorMessage(code, keys, value) {
+        const list = {
+            "990": this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
+            "001": this.REQUIRED_ERROR_MESSAGE,
+            "101": this.REQUIRED_ERROR_MESSAGE,
+            "002": this.INVALID_OBJECT_ERROR_MESSAGE,
+            "102": this.INVALID_OBJECT_ERROR_MESSAGE,
+            "003": this.INVALID_ARRAY_ERROR_MESSAGE,
+            "103": this.INVALID_ARRAY_ERROR_MESSAGE,
+            "004": this.UNNECESSARY_INPUT_ERROR_MESSAGE,
+            "104": this.UNNECESSARY_INPUT_ERROR_MESSAGE,
+            "201": this.INVALID_NUMBER_ERROR_MESSAGE,
+            "211": this.INVALID_BOOL_ERROR_MESSAGE,
+            "212": this.INVALID_BOOL_ERROR_MESSAGE,
+            "213": this.INVALID_BOOL_ERROR_MESSAGE,
+            "221": this.INVALID_STRING_ERROR_MESSAGE,
+            "231": this.INVALID_UUID_ERROR_MESSAGE,
+            "241": this.INVALID_MAIL_ERROR_MESSAGE,
+            "251": this.INVALID_DATE_ERROR_MESSAGE,
+            "252": this.INVALID_DATE_ERROR_MESSAGE,
+            "261": this.INVALID_TIME_ERROR_MESSAGE,
+            "271": this.INVALID_DATETIME_ERROR_MESSAGE,
+            "272": this.INVALID_DATETIME_ERROR_MESSAGE,
+        };
+        return list[code].replace("{property}", keys.join('.')).replace("{value}", value);
     }
     /**
      * Sets the values of the request body to the class properties.
@@ -262,13 +279,10 @@ class RequestType extends ReqResType_1.default {
     setObject(keys, values) {
         const property = this.getProperty(keys);
         for (const key of Object.keys(property.properties)) {
-            // NULLチェック
+            // NULL Check
             if (key in values === false || values[key] === null || values[key] === "") {
                 if (property.properties[key].type.endsWith('?')) {
-                    // nullの値入れる（undefinedはキー指定なし）
-                    if (values[key] === null || values[key] === "") {
-                        this.changeBody([...keys, key], null);
-                    }
+                    this.changeBody([...keys, key], null);
                     continue;
                 }
                 else {
@@ -300,7 +314,7 @@ class RequestType extends ReqResType_1.default {
                     break;
             }
         }
-        // 不要項目チェック
+        // unnecessary input check
         for (const [key, value] of Object.entries(values)) {
             if (key in property.properties === false) {
                 this.throwException("104", this.ErrorMessage("104", [...keys, key], value));
@@ -414,23 +428,4 @@ class RequestType extends ReqResType_1.default {
         this.changeBody(keys, this.convertValue(property.type, value, keys));
     }
 }
-// *****************************************
-// Input Error Message
-// Please make changes to error messages in the subclass
-// エラー文言
-// エラーメッセージの変更はサブクラスで行ってください
-// *****************************************
-RequestType.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
-RequestType.REQUIRED_ERROR_MESSAGE = '{property} is required.';
-RequestType.UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
-RequestType.INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
-RequestType.INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
-RequestType.INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
-RequestType.INVALID_BOOL_ERROR_MESSAGE = '{property} must be of type bool or a string with true, false, or a number with 0, 1. ({value})';
-RequestType.INVALID_STRING_ERROR_MESSAGE = '{property} must be of type string. ({value})';
-RequestType.INVALID_UUID_ERROR_MESSAGE = '{property} must be a UUID. ({value})';
-RequestType.INVALID_MAIL_ERROR_MESSAGE = '{property} must be an email. ({value})';
-RequestType.INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
-RequestType.INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
-RequestType.INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
-exports.default = RequestType;
+exports.RequestType = RequestType;
