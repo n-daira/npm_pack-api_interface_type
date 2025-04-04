@@ -1,108 +1,127 @@
 import { Request } from "express";
 import { RequestType } from '../../src/RequestType';
 import { PropertyType } from '../../src/ReqResType';
+import TestUtils from "../TestUtils";
 
+/**
+ * class for check
+ */
 class TestRequestType extends RequestType {
     protected properties: { [key: string]: PropertyType; } = {
-        num: { type: 'number?', description: 'only number null' }
+        num: { type: 'number?', description: 'only boolean' }
     }
 }
 
-describe('INPUT ERROR CHECK', () => {
-    it('input string', () => {
-        const body = {num: "str"}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.num; // access and cause an error;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message; // confirm that occured error
-            expect(message).toBe("201: " + instance.INVALID_NUMBER_ERROR_MESSAGE.replace("{property}", "num").replace("{value}", "str"));
-        }
-    });
-    
-    it('input boolean true', () => {
-        const body = {num: true}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.num;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("201: " + instance.INVALID_NUMBER_ERROR_MESSAGE.replace("{property}", "num").replace("{value}", "true"));
-        }
+// ********************************************************
+// * error test
+// ********************************************************
+const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage: string, errorValue: string) => {
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            try {
+                instance.Data.num; // access and cause an error;
+                fail("fali test");
+            } catch (error) {
+                expect(error).toBeDefined(); // confirm that occured error
+                const message = ((error as unknown) as any).message;
+                expect(message).toBe(`${errorCode}: ${errorMessage.replace("{property}", "num").replace("{value}", errorValue)}`);
+            }
+        })
+    }
+}
+
+// instance for error message
+const r = new TestRequestType({} as Request);
+
+describe('input error check unnecessary input', () => {
+    const param = {aaa: -100}
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            try {
+                instance.Data.num; // access and cause an error;
+                fail("fali test");
+            } catch (error) {
+                expect(error).toBeDefined(); // confirm that occured error
+                const message = ((error as unknown) as any).message;
+                expect(message).toBe(`004: ${instance.UNNECESSARY_INPUT_ERROR_MESSAGE.replace("{property}", "aaa")}`);
+            }
+        })
+    }
+})
+
+describe('input error check', () => {
+    describe('input string', () => {
+        errorCheck({num: "strval"}, "201", r.INVALID_NUMBER_ERROR_MESSAGE, "strval");
     });
 
-    it('input boolean false', () => {
-        const body = {num: false}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.num;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("201: " + instance.INVALID_NUMBER_ERROR_MESSAGE.replace("{property}", "num").replace("{value}", "false"));
-        }
+    describe('input boolean true', () => {
+        errorCheck({num: true}, "201", r.INVALID_NUMBER_ERROR_MESSAGE, "true");
     });
 
-    it('input object', () => {
-        const body = {num: {key: 1}};
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.num;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("201: " + instance.INVALID_NUMBER_ERROR_MESSAGE.replace("{property}", "num").replace("{value}", "[object Object]"));
-        }
+    describe('input boolean false', () => {
+        errorCheck({num: false}, "201", r.INVALID_NUMBER_ERROR_MESSAGE, "false");
     });
 
-    it('input array', () => {
-        const body = {num: [5]};
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.num;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("201: " + instance.INVALID_NUMBER_ERROR_MESSAGE.replace("{property}", "num").replace("{value}", "5"));
-        }
+    describe('input object', () => {
+        errorCheck({num: {key: 1}}, "201", r.INVALID_NUMBER_ERROR_MESSAGE, "[object Object]");
+    });
+
+    describe('input array', () => {
+        errorCheck({num: [9]}, "201", r.INVALID_NUMBER_ERROR_MESSAGE, "9");
     });
 });
 
-describe('INPUT SUCCESS CHECK', () => {
-    it('input empty', () => {
-        const body = { }
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.num).toBe(null);
+
+// ********************************************************
+// * success test
+// ********************************************************
+const successCheck = (param: {[key: string]: any}, toBe: any) => {
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            expect(instance.Data.num).toBe(toBe);
+        })
+    }
+}
+
+describe('input success check null', () => {
+    describe('input empty', () => {
+        successCheck({}, null);
     });
 
-    it('input null', () => {
-        const body = { num: null }
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.num).toBe(null);
+    describe('input null', () => {
+        successCheck({num: null}, null);
     });
 
-    it('input empty string', () => {
-        const body = { num: "" }
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.num).toBe(null);
+    describe('input empty string', () => {
+        successCheck({num: ""}, null);
+    });
+})
+
+describe('input success check', () => {
+    describe('input number 1', () => {
+        successCheck({num: 1}, 1);
     });
 
-    it('input number', () => {
-        const body = { num: 1 }
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.num).toBe(1);
+    describe('input nunmber -100', () => {
+        successCheck({num: -100}, -100);
     });
 
-    it('input string number', () => {
-        const body = { num: "100" }
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.num).toBe(100);
+    describe('input nunmber 50.234', () => {
+        successCheck({num: 50.234}, 50.234);
+    });
+
+    describe('input string 9', () => {
+        successCheck({num: "9"}, 9);
+    });
+
+    describe('input string -500', () => {
+        successCheck({num: "-500"}, -500);
+    });
+
+    describe('input string 12.345', () => {
+        successCheck({num: "12.345"}, 12.345);
     });
 });

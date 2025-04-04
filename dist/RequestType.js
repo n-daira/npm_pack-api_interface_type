@@ -58,7 +58,7 @@ class RequestType extends ReqResType_1.default {
         // *****************************************
         this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
         this.REQUIRED_ERROR_MESSAGE = '{property} is required.';
-        this.UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
+        this.UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ";
         this.INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
         this.INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
         this.INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
@@ -82,8 +82,10 @@ class RequestType extends ReqResType_1.default {
     ErrorMessage(code, keys, value) {
         const list = {
             "990": this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
+            "000": this.REQUIRED_ERROR_MESSAGE,
             "001": this.REQUIRED_ERROR_MESSAGE,
             "101": this.REQUIRED_ERROR_MESSAGE,
+            "301": this.REQUIRED_ERROR_MESSAGE,
             "002": this.INVALID_OBJECT_ERROR_MESSAGE,
             "102": this.INVALID_OBJECT_ERROR_MESSAGE,
             "003": this.INVALID_ARRAY_ERROR_MESSAGE,
@@ -133,12 +135,36 @@ class RequestType extends ReqResType_1.default {
         for (const key of Object.keys(this.properties)) {
             // NULLチェック
             if (key in this.data === false || this.data[key] === null || this.data[key] === "") {
-                if (this.properties[key].type.endsWith('?')) {
-                    this.changeBody([key], null);
-                    continue;
+                if (this.properties[key].type === 'array' && ['GET', 'DELETE'].includes(this.request.method)) {
+                    // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
+                    // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
+                    // この処理で空文字やnullが入った場合の対処をここで行う
+                    const itemProperty = this.properties[key].properties;
+                    if (itemProperty.type.endsWith('?')) {
+                        const tempValue = this.data[key];
+                        this.data[key] = [];
+                        if (tempValue !== undefined) {
+                            if (itemProperty.type === 'string?') {
+                                this.data[key][0] = tempValue;
+                            }
+                            else {
+                                this.data[key][0] = null;
+                            }
+                        }
+                        continue;
+                    }
+                    else {
+                        this.throwException("000", this.ErrorMessage("000", [key, 0], ""));
+                    }
                 }
                 else {
-                    this.throwException("001", this.ErrorMessage("001", [key], ""));
+                    if (this.properties[key].type.endsWith('?')) {
+                        this.changeBody([key], null);
+                        continue;
+                    }
+                    else {
+                        this.throwException("001", this.ErrorMessage("001", [key], ""));
+                    }
                 }
             }
             const value = this.data[key];
@@ -161,7 +187,7 @@ class RequestType extends ReqResType_1.default {
                         if (this.request.method === 'GET' || this.request.method === 'DELETE') {
                             // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                             // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
-                            this.data[key] = [this.convertValue(this.properties[key].item.type, value, [key, 0])];
+                            this.data[key] = [this.convertValue(this.properties[key].properties.type, value, [key, 0])];
                         }
                         else {
                             this.throwException("003", this.ErrorMessage("003", [key], value));
@@ -196,6 +222,16 @@ class RequestType extends ReqResType_1.default {
     setArray(keys, values) {
         const property = this.getProperty(keys);
         for (let i = 0; i < values.length; i++) {
+            // NULL Check
+            if (values[i] === undefined || values[i] === null || (property.properties.type.replace("?", "") !== "string" && values[i] === "")) {
+                if (property.properties.type.endsWith('?')) {
+                    this.changeBody([...keys, i], values[i] === undefined ? undefined : null);
+                    continue;
+                }
+                else {
+                    this.throwException("301", this.ErrorMessage("301", [...keys, i], ""));
+                }
+            }
             switch (property.properties.type) {
                 case 'object':
                 case 'object?':

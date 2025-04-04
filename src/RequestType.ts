@@ -11,7 +11,7 @@ export class RequestType extends ReqResType {
     // *****************************************
     public readonly INVALID_PATH_PARAM_UUID_ERROR_MESSAGE = 'The {property} in the URL must be a UUID. ({value})';
     public readonly REQUIRED_ERROR_MESSAGE = '{property} is required.';
-    public readonly UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ({value})";
+    public readonly UNNECESSARY_INPUT_ERROR_MESSAGE = "{property} is unnecessary input. ";
     public readonly INVALID_OBJECT_ERROR_MESSAGE = '{property} must be of type Object. ({value})';
     public readonly INVALID_ARRAY_ERROR_MESSAGE = '{property} must be of type Array. ({value})';
     public readonly INVALID_NUMBER_ERROR_MESSAGE = '{property} must be of type number. ({value})';
@@ -82,13 +82,15 @@ export class RequestType extends ReqResType {
      * @param {any} value - The value that caused the error. エラーを引き起こした値
      * @returns {string} The generated error message. 生成されたエラーメッセージ
      */
-    private ErrorMessage(code: "990" | "001" | "002" | "003" | "004" | "101" | "102" | "103" | "104" |
+    private ErrorMessage(code: "990" | "000" | "001" | "002" | "003" | "004" | "101" | "102" | "103" | "104" |
         "201" | "211" | "212" | "213" | "221" | "231" | "241" | "251" | "252" |
-        "261" | "271" | "272", keys: Array<string | number>, value: any): string {
+        "261" | "271" | "272" | "301", keys: Array<string | number>, value: any): string {
         const list = {
             "990": this.INVALID_PATH_PARAM_UUID_ERROR_MESSAGE,
+            "000": this.REQUIRED_ERROR_MESSAGE,
             "001": this.REQUIRED_ERROR_MESSAGE,
             "101": this.REQUIRED_ERROR_MESSAGE,
+            "301": this.REQUIRED_ERROR_MESSAGE,
             "002": this.INVALID_OBJECT_ERROR_MESSAGE,
             "102": this.INVALID_OBJECT_ERROR_MESSAGE,
             "003": this.INVALID_ARRAY_ERROR_MESSAGE,
@@ -142,11 +144,32 @@ export class RequestType extends ReqResType {
 
             // NULLチェック
             if (key in this.data === false || this.data[key] === null || this.data[key] === "") {
-                if (this.properties[key].type.endsWith('?')) {
-                    this.changeBody([key], null);
-                    continue;
+                if (this.properties[key].type === 'array' && ['GET', 'DELETE'].includes(this.request.method)) {
+                    // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
+                    // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
+                    // この処理で空文字やnullが入った場合の対処をここで行う
+                    const itemProperty = this.properties[key].properties;
+                    if (itemProperty.type.endsWith('?')) {
+                        const tempValue = this.data[key];
+                        this.data[key] = [];
+                        if (tempValue !== undefined) {
+                            if (itemProperty.type === 'string?') {
+                                this.data[key][0] = tempValue;
+                            } else {
+                                this.data[key][0] = null;
+                            }
+                        }
+                        continue;
+                    } else {
+                        this.throwException("000", this.ErrorMessage("000", [key, 0], ""));
+                    }
                 } else {
-                    this.throwException("001", this.ErrorMessage("001", [key], ""));
+                    if (this.properties[key].type.endsWith('?')) {
+                        this.changeBody([key], null);
+                        continue;
+                    } else {
+                        this.throwException("001", this.ErrorMessage("001", [key], ""));
+                    }
                 }
             }
 
@@ -168,7 +191,7 @@ export class RequestType extends ReqResType {
                         if (this.request.method === 'GET' || this.request.method === 'DELETE') {
                             // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                             // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
-                            this.data[key] = [this.convertValue(this.properties[key].item.type, value, [key, 0])];
+                            this.data[key] = [this.convertValue(this.properties[key].properties.type, value, [key, 0])];
                         } else {
                             this.throwException("003", this.ErrorMessage("003", [key], value));
                         }
@@ -204,6 +227,16 @@ export class RequestType extends ReqResType {
     private setArray(keys: Array<string | number>, values: any) {
         const property = this.getProperty(keys);
         for (let i = 0;i < values.length; i++) {
+
+            // NULL Check
+            if (values[i] === undefined || values[i] === null || (property.properties.type.replace("?", "") !== "string" && values[i] === "")) {
+                if (property.properties.type.endsWith('?')) {
+                    this.changeBody([...keys, i], values[i] === undefined ? undefined : null);
+                    continue;
+                } else {
+                    this.throwException("301", this.ErrorMessage("301", [...keys, i], ""));
+                }
+            }
 
             switch (property.properties.type) {
                 case 'object':

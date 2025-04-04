@@ -3,7 +3,7 @@ import { PropertyType } from '../../src/ReqResType';
 
 class TestResponseType extends ResponseType {
     protected properties: { [key: string]: PropertyType; } = {
-        bool: { type: 'boolean', description: 'only boolean' }
+        bool: { type: 'boolean?', description: 'only boolean' }
     }
     set Bool(value: any) { this.Data.bool = value; }
 }
@@ -17,18 +17,6 @@ describe('output undefined check', () => {
     it('input undefined', () => {
         const instance = new TestResponseType();
         instance.Bool = undefined;
-        expect(instance.ResponseData.bool).toBe(undefined);
-    });
-
-    it('input null', () => {
-        const instance = new TestResponseType();
-        instance.Bool = null;
-        expect(instance.ResponseData.bool).toBe(undefined);
-    });
-
-    it('input empty string', () => {
-        const instance = new TestResponseType();
-        instance.Bool = "";
         expect(instance.ResponseData.bool).toBe(undefined);
     });
 
@@ -64,6 +52,18 @@ describe('output undefined check', () => {
 });
 
 describe('output valid value', () => {
+    it('input null', () => {
+        const instance = new TestResponseType();
+        instance.Bool = null;
+        expect(instance.ResponseData.bool).toBe(null);
+    });
+
+    it('input empty string', () => {
+        const instance = new TestResponseType();
+        instance.Bool = "";
+        expect(instance.ResponseData.bool).toBe(null);
+    });
+
     it('input bool true', () => {
         const instance = new TestResponseType();
         instance.Bool = true;

@@ -1,153 +1,127 @@
 import { Request } from "express";
 import { RequestType } from '../../src/RequestType';
 import { PropertyType } from '../../src/ReqResType';
+import TestUtils from "../TestUtils";
 
+/**
+ * class for check
+ */
 class TestRequestType extends RequestType {
     protected properties: { [key: string]: PropertyType; } = {
         bool: { type: 'boolean', description: 'only boolean' }
     }
 }
 
-describe('INPUT ERROR CHECK', () => {
-    it('input empty', () => {
-        const body = {}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool; // access and cause an error;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined(); // confirm that occured error
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("001: " + instance.REQUIRED_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", ""));
-        }
+// ********************************************************
+// * error test
+// ********************************************************
+const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage: string, errorValue: string) => {
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            try {
+                instance.Data.bool; // access and cause an error;
+                fail("fali test");
+            } catch (error) {
+                expect(error).toBeDefined(); // confirm that occured error
+                const message = ((error as unknown) as any).message;
+                expect(message).toBe(`${errorCode}: ${errorMessage.replace("{property}", "bool").replace("{value}", errorValue)}`);
+            }
+        })
+    }
+}
+
+// instance for error message
+const r = new TestRequestType({} as Request);
+
+describe('input error check unnecessary input', () => {
+    const param = {bool: true, aaa: true}
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            try {
+                instance.Data.num; // access and cause an error;
+                fail("fali test");
+            } catch (error) {
+                expect(error).toBeDefined(); // confirm that occured error
+                const message = ((error as unknown) as any).message;
+                expect(message).toBe(`004: ${instance.UNNECESSARY_INPUT_ERROR_MESSAGE.replace("{property}", "aaa")}`);
+            }
+        })
+    }
+})
+
+describe('input error check required param', () => {
+    describe('input empty', () => {
+        errorCheck({}, "001", r.REQUIRED_ERROR_MESSAGE, "");
     });
 
-    it('input null', () => {
-        const body = {bool: null}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("001: " + instance.REQUIRED_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", ""));
-        }
+    describe('input null', () => {
+        errorCheck({bool: null}, "001", r.REQUIRED_ERROR_MESSAGE, "");
     });
 
-    it('input empty string', () => {
-        const body = {bool: ""}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("001: " + instance.REQUIRED_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", ""));
-        }
+    describe('input empty string', () => {
+        errorCheck({bool: ""}, "001", r.REQUIRED_ERROR_MESSAGE, "");
+    });
+})
+
+describe('input error check fail input', () => {
+    describe('input number 2', () => {
+        errorCheck({bool: 2}, "211", r.INVALID_BOOL_ERROR_MESSAGE, "2");
     });
 
-    it('input number 2', () => {
-        const body = {bool: 2}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("211: " + instance.INVALID_BOOL_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", "2"));
-        }
+    describe('input number -1', () => {
+        errorCheck({bool: -1}, "211", r.INVALID_BOOL_ERROR_MESSAGE, "-1");
     });
 
-    it('input number -1', () => {
-        const body = {bool: -1}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("211: " + instance.INVALID_BOOL_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", "-1"));
-        }
+    describe('input string', () => {
+        errorCheck({bool: "strval"}, "212", r.INVALID_BOOL_ERROR_MESSAGE, "strval");
     });
 
-    it('input string', () => {
-        const body = {bool: "strval"}
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("212: " + instance.INVALID_BOOL_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", "strval"));
-        }
+    describe('input object', () => {
+        errorCheck({bool: {key: true}}, "213", r.INVALID_BOOL_ERROR_MESSAGE, "[object Object]");
     });
 
-    it('input object', () => {
-        const body = {bool: {key: "strval"}};
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("213: " + instance.INVALID_BOOL_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", "[object Object]"));
-        }
-    });
-
-    it('input array', () => {
-        const body = {bool: ["strval"]};
-        const instance = new TestRequestType({body: body} as Request);
-        try {
-            instance.Data.bool;
-            fail("fali test");
-        } catch (error) {
-            expect(error).toBeDefined();
-            const message = ((error as unknown) as any).message;
-            expect(message).toBe("213: " + instance.INVALID_BOOL_ERROR_MESSAGE.replace("{property}", "bool").replace("{value}", "strval"));
-        }
+    describe('input array', () => {
+        errorCheck({bool: [true]}, "213", r.INVALID_BOOL_ERROR_MESSAGE, "true");
     });
 });
 
-describe('INPUT SUCCESS CHECK', () => {
-    it('input boolean true', () => {
-        const body = {bool: true}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(true);
+
+// ********************************************************
+// * success test
+// ********************************************************
+const successCheck = (param: {[key: string]: any}, toBe: any) => {
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            expect(instance.Data.bool).toBe(toBe);
+        })
+    }
+}
+
+describe('input success check', () => {
+    describe('input boolean true', () => {
+        successCheck({bool: true}, true);
     });
 
-    it('input boolean false', () => {
-        const body = {bool: false}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(false);
+    describe('input boolean false', () => {
+        successCheck({bool: false}, false);
     });
 
-    it('input number 1', () => {
-        const body = {bool: 1}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(true);
+    describe('input number 1', () => {
+        successCheck({bool: 1}, true);
     });
 
-    it('input nunmber 0', () => {
-        const body = {bool: 0}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(false);
+    describe('input nunmber 0', () => {
+        successCheck({bool: 0}, false);
     });
 
-    it('input string true', () => {
-        const body = {bool: "true"}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(true);
+    describe('input string true', () => {
+        successCheck({bool: "true"}, true);
     });
 
-    it('input string false', () => {
-        const body = {bool: "false"}
-        const instance = new TestRequestType({body: body} as Request);
-        expect(instance.Data.bool).toBe(false);
+    describe('input string false', () => {
+        successCheck({bool: "false"}, false);
     });
 });

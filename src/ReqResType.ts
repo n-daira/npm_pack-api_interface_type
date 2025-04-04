@@ -16,7 +16,7 @@ type ObjectType = {
 type ArrayType = {
     type: 'array' | 'array?';
     description?: string;
-    item: PropertyType;
+    properties: PropertyType;
 };
 
 export type PropertyType = PrimitiveType | ObjectType | ArrayType;

@@ -8,7 +8,7 @@ class TestResponseType extends ResponseType {
     set Str(value: any) { this.Data.str = value; }
 }
 
-describe('OUTPUT UNDEFINED CHECK', () => {
+describe('output undefined check', () => {
     it('input empty', () => {
         const instance = new TestResponseType();
         expect(instance.ResponseData.str).toBe(undefined);
@@ -51,7 +51,7 @@ describe('OUTPUT UNDEFINED CHECK', () => {
     });
 });
 
-describe('OUTPUT VALID VALUE', () => {
+describe('output valid value', () => {
     it('input number', () => {
         const instance = new TestResponseType();
         instance.Str = 100;
