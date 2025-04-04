@@ -1,8 +1,11 @@
 import { Request } from 'express';
-import { PropertyType } from './src/ReqResType';
+import { ArrayType, ObjectType, PrimitiveType } from './src/ReqResType';
 import { IncomingHttpHeaders } from './src/RequestType';
 
 declare module 'api-interface-type' {
+
+    export type PropertyType =  PrimitiveType | ObjectType | ArrayType;
+
     export class RequestType {
         constructor(req: Request);
 
