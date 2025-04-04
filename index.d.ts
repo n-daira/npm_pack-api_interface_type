@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { PropertyType } from './src/ReqResType';
 import { IncomingHttpHeaders } from './src/RequestType';
 
-declare module 'test-api-interface-type' {
+declare module 'api-interface-type' {
     export class RequestType {
         constructor(req: Request);
 
