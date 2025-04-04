@@ -32,6 +32,8 @@ declare module 'api-interface-type' {
         get RemoteAddress(): string | undefined;
         get Authorization(): string | null;
         get Req(): Request;
+
+        public createSwagger(method: string): string;
     }
 
     export class ResponseType {
@@ -39,5 +41,7 @@ declare module 'api-interface-type' {
 
         protected properties: { [key: string]: PropertyType; };
         get ResponseData(): { [key: string]: any };
+
+        public createSwagger(): string;
     }
 }

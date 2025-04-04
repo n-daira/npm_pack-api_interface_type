@@ -460,5 +460,131 @@ class RequestType extends ReqResType_1.default {
         const property = this.getProperty(keys);
         this.changeBody(keys, this.convertValue(property.type, value, keys));
     }
+    // ****************************************************************************
+    // for create swagger
+    // ****************************************************************************
+    /**
+     * Generates a Swagger YAML definition from the request body.
+     * リクエストボディからSwaggerのYAML定義を生成します。
+     * @returns {string} Swagger format YAML definition
+     * Swagger形式のYAML定義
+     */
+    createSwagger(method) {
+        if (method === 'GET' || method === 'DELETE') {
+            const tabCount = 4;
+            const space = '  '.repeat(tabCount);
+            let ymlString = '';
+            for (const [key, property] of Object.entries(this.properties)) {
+                ymlString += `${space}- name: ${key}\n`;
+                ymlString += `${space}  in: query\n`;
+                if (property.description !== undefined) {
+                    ymlString += `${space}  description: ${property.description}\n`;
+                }
+                ymlString += `${space}  required: ${property.type.endsWith('?') ? 'false' : 'true'}\n`;
+                ymlString += `${space}  schema:\n`;
+                ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+            }
+            return ymlString;
+        }
+        else {
+            const tabCount = 8;
+            const space = '  '.repeat(tabCount);
+            let componentYml = '\n';
+            let requiredList = [];
+            for (const [key, property] of Object.entries(this.properties)) {
+                if (property.type.endsWith('?') === false) {
+                    requiredList.push(key);
+                }
+                componentYml += `${space}${key}:\n`;
+                componentYml += `  ${space}type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+                if (property.description !== undefined) {
+                    componentYml += `  ${space}description: ${property.description}\n`;
+                }
+                switch (property.type) {
+                    case 'object':
+                    case 'object?':
+                        componentYml += this.makeSwaggerProperyFromObject([key], tabCount + 1);
+                        break;
+                    case 'array':
+                    case 'array?':
+                        componentYml += this.makeSwaggerPropertyFromArray([key], tabCount + 1);
+                        break;
+                }
+            }
+            if (requiredList.length > 0) {
+                componentYml += `              required:\n`;
+                componentYml += `                - ${requiredList.join(`\n                - `)}\n`;
+            }
+            let ymlString = `      requestBody:\n`;
+            ymlString += `        content:\n`;
+            ymlString += `          application/json:\n`;
+            ymlString += `            schema:\n`;
+            ymlString += `              type: object\n`;
+            ymlString += `              properties:${componentYml}`;
+            ymlString += `          application/x-www-form-urlencoded:\n`;
+            ymlString += `            schema:\n`;
+            ymlString += `              type: object\n`;
+            ymlString += `              properties:${componentYml}`;
+            return ymlString;
+        }
+    }
+    /**
+     * Generates Swagger properties from object type properties
+     * オブジェクト型のプロパティからSwaggerのプロパティを生成
+     * @param {Array.<string|number>} keys - Path to the properties
+     * プロパティへのパス
+     * @returns {string} Swagger format property definition
+     * Swagger形式のプロパティ定義
+     */
+    makeSwaggerProperyFromObject(keys, tabCount) {
+        const space = '  '.repeat(tabCount);
+        let ymlString = `${space}properties:\n`;
+        const properties = this.getProperty(keys).properties;
+        for (const key of Object.keys(properties)) {
+            const property = properties[key];
+            ymlString += `${space}  ${key}:\n`;
+            ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+            if (property.description !== undefined) {
+                ymlString += `${space}    description: ${property.description}\n`;
+            }
+            switch (property.type) {
+                case 'object':
+                case 'object?':
+                    ymlString += this.makeSwaggerProperyFromObject([...keys, key], tabCount + 2);
+                    break;
+                case 'array':
+                case 'array?':
+                    ymlString += this.makeSwaggerPropertyFromArray([...keys, key], tabCount + 2);
+                    break;
+            }
+        }
+        return ymlString;
+    }
+    /**
+     * Generates Swagger properties from array type properties
+     * 配列型のプロパティからSwaggerのプロパティを生成
+     * @param {Array.<string|number>} keys - Path to the properties
+     * プロパティへのパス
+     * @returns {string} Swagger format property definition
+     * Swagger形式のプロパティ定義
+     */
+    makeSwaggerPropertyFromArray(keys, tabCount) {
+        const property = this.getProperty(keys).properties;
+        const space = '  '.repeat(tabCount);
+        let ymlString = `${space}items:\n`;
+        ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+        ymlString += `${space}  description: ${property.description}\n`;
+        switch (property.type) {
+            case 'object':
+            case 'object?':
+                ymlString += this.makeSwaggerProperyFromObject([...keys, 0], tabCount + 1);
+                break;
+            case 'array':
+            case 'array?':
+                ymlString += this.makeSwaggerPropertyFromArray([...keys, 0], tabCount + 1);
+                break;
+        }
+        return ymlString;
+    }
 }
 exports.RequestType = RequestType;

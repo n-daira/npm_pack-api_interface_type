@@ -253,5 +253,107 @@ class ResponseType extends ReqResType_1.default {
                 return undefined;
         }
     }
+    // ****************************************************************************
+    // for create swagger
+    // ****************************************************************************
+    /**
+     * Generates Swagger response definition
+     * Swaggerのレスポンス定義を生成します
+     * @returns {string} Swagger format response definition
+     * Swagger形式のレスポンス定義
+     */
+    createSwagger() {
+        let ymlString = `      responses:
+        '200':
+          description: 成功事レスポンス
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:`;
+        if (Object.keys(this.properties).length === 0) {
+            ymlString += ' {}\n';
+            return ymlString;
+        }
+        ymlString += `\n`;
+        let tabCount = 9;
+        const space = '  '.repeat(tabCount);
+        for (const [key, property] of Object.entries(this.properties)) {
+            ymlString += `${space}${key}:\n`;
+            ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+            if (property.description !== undefined) {
+                ymlString += `${space}  description: ${property.description}\n`;
+            }
+            switch (property.type) {
+                case 'object':
+                case 'object?':
+                    ymlString += this.makeSwaggerProperyFromObject([key], tabCount + 1);
+                    break;
+                case 'array':
+                case 'array?':
+                    ymlString += this.makeSwaggerPropertyFromArray([key], tabCount + 1);
+                    break;
+            }
+        }
+        return ymlString;
+    }
+    /**
+     * Generates Swagger properties from object type properties
+     * オブジェクト型のプロパティからSwaggerのプロパティを生成
+     * @param {Array.<string|number>} keys - Path to the properties
+     * プロパティへのパス
+     * @returns {string} Swagger format property definition
+     * Swagger形式のプロパティ定義
+     */
+    makeSwaggerProperyFromObject(keys, tabCount) {
+        const space = '  '.repeat(tabCount);
+        let ymlString = `${space}properties:\n`;
+        const properties = this.getProperty(keys).properties;
+        for (const key of Object.keys(properties)) {
+            const property = properties[key];
+            ymlString += `${space}  ${key}:\n`;
+            ymlString += `${space}    type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+            if (property.description !== undefined) {
+                ymlString += `${space}    description: ${property.description}\n`;
+            }
+            switch (property.type) {
+                case 'object':
+                case 'object?':
+                    ymlString += this.makeSwaggerProperyFromObject([...keys, key], tabCount + 2);
+                    break;
+                case 'array':
+                case 'array?':
+                    ymlString += this.makeSwaggerPropertyFromArray([...keys, key], tabCount + 2);
+                    break;
+            }
+        }
+        return ymlString;
+    }
+    /**
+     * Generates Swagger properties from array type properties
+     * 配列型のプロパティからSwaggerのプロパティを生成
+     * @param {Array.<string|number>} keys - Path to the properties, プロパティへのパス
+     * @returns {string} Swagger format property definition, Swagger形式のプロパティ定義
+     */
+    makeSwaggerPropertyFromArray(keys, tabCount) {
+        const property = this.getProperty(keys).properties;
+        const space = '  '.repeat(tabCount);
+        let ymlString = `${space}items:\n`;
+        ymlString += `${space}  type: ${this.replaceFromPropertyTypeToSwagger(property.type)}\n`;
+        if (property.description !== undefined) {
+            ymlString += `${space}  description: ${property.description}\n`;
+        }
+        switch (property.type) {
+            case 'object':
+            case 'object?':
+                ymlString += this.makeSwaggerProperyFromObject([...keys, 0], tabCount + 1);
+                break;
+            case 'array':
+            case 'array?':
+                ymlString += this.makeSwaggerPropertyFromArray([...keys, 0], tabCount + 1);
+                break;
+        }
+        return ymlString;
+    }
 }
 exports.ResponseType = ResponseType;

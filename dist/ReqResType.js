@@ -3,12 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class ReqResType {
     constructor() {
         this.properties = {};
-        // protected replaceFromPropertyTypeToSwagger(value: string): string {
-        //     value = value.replace('?', '');
-        //     value = value.replace('number', 'integer');
-        //     value = value.replace(/datetime|date|time|uuid|mail/g, 'string');
-        //     return value;
-        // }
     }
     /**
      * Checks if the value is a valid date-time format
@@ -132,6 +126,18 @@ class ReqResType {
         }
         const pattern = new RegExp('^[a-zA-Z0-9_%+-]+([.][a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9]+([-.]?[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,}$');
         return pattern.test(value);
+    }
+    /**
+     * プロパティの型をSwagger形式に変換します
+     * Converts the property type to Swagger format
+     * @param {string} value - 変換する値, The value to be converted
+     * @returns {string} - Swagger形式の値, The value in Swagger format
+     */
+    replaceFromPropertyTypeToSwagger(value) {
+        value = value.replace('?', '');
+        value = value.replace('number', 'integer');
+        value = value.replace(/datetime|date|time|uuid|mail/g, 'string');
+        return value;
     }
 }
 exports.default = ReqResType;

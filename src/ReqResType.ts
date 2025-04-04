@@ -161,12 +161,17 @@ export default class ReqResType {
         return pattern.test(value);
     }
 
-
-    // protected replaceFromPropertyTypeToSwagger(value: string): string {
-    //     value = value.replace('?', '');
-    //     value = value.replace('number', 'integer');
-    //     value = value.replace(/datetime|date|time|uuid|mail/g, 'string');
+    /**
+     * プロパティの型をSwagger形式に変換します
+     * Converts the property type to Swagger format
+     * @param {string} value - 変換する値, The value to be converted
+     * @returns {string} - Swagger形式の値, The value in Swagger format
+     */
+    protected replaceFromPropertyTypeToSwagger(value: string): string {
+        value = value.replace('?', '');
+        value = value.replace('number', 'integer');
+        value = value.replace(/datetime|date|time|uuid|mail/g, 'string');
         
-    //     return value;
-    // }
+        return value;
+    }
 }
