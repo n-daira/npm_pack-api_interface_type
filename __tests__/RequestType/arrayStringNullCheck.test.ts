@@ -23,9 +23,9 @@ const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage
         }
 
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
             try {
-                instance.Data.arr; // access and cause an error;
+                instance.setRequest(TestUtils.createMockRequest(method, param));
                 fail("fali test");
             } catch (error) {
                 expect(error).toBeDefined(); // confirm that occured error
@@ -37,15 +37,15 @@ const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage
 }
 
 // instance for error message
-const r = new TestRequestType({} as Request);
+const r = new TestRequestType();
 
 describe('input error check unnecessary input', () => {
     const param = {arr: ["strval"],aaa: true}
     for (const method of TestUtils.METHODS) {
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
             try {
-                instance.Data.arr; // access and cause an error;
+                instance.setRequest(TestUtils.createMockRequest(method, param));
                 fail("fali test");
             } catch (error) {
                 expect(error).toBeDefined(); // confirm that occured error
@@ -109,7 +109,8 @@ const successCheck = (param: {[key: string]: any}, toBe: Array<any>) => {
             if (['GET', 'DELETE'].includes(method) && param.arr.length === 1) {
                 param = {arr: param.arr[0]};
             }
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
+            instance.setRequest(TestUtils.createMockRequest(method, param));
             expect(instance.Data.arr.length).toBe(toBe.length);
             for (let i = 0;i < instance.Data.arr.length;i++) {
                 expect(instance.Data.arr[i]).toBe(toBe[i]);

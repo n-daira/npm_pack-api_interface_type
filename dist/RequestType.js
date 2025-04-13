@@ -6,50 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequestType = void 0;
 const ReqResType_1 = __importDefault(require("./ReqResType"));
 class RequestType extends ReqResType_1.default {
-    /**
-     * Throws an exception with the given code and message.
-     * If you want to perform custom processing, please change it in the subclass.
-     * 指定されたコードとメッセージで例外をスローします。
-     * 独自処理を行う場合はサブクラスで変更してください。
-     * @param {string} code - The error code. エラーコード
-     * @param {string} message - The error message. エラーメッセージ
-     */
-    throwException(code, message) {
-        throw new Error(`${code}: ${message}`);
-    }
-    get Data() {
-        var _a;
-        if (this.data === undefined) {
-            this.createBody();
-        }
-        return (_a = this.data) !== null && _a !== void 0 ? _a : {};
-    }
-    get Headers() { return this.request.headers; }
-    get Params() {
-        if (this.params === undefined) {
-            for (const [key, value] of Object.entries(this.request.params)) {
-                if (key.includes("id") || key.includes("Id")) {
-                    if (this.isUUID(value) === false) {
-                        this.throwException("990", this.ErrorMessage("990", [key], value));
-                    }
-                }
-            }
-        }
-        this.params = this.request.params;
-        return this.params;
-    }
-    get RemoteAddress() { return this.request.socket.remoteAddress; }
-    get Authorization() {
-        var _a;
-        const authorization = (_a = this.Headers['authorization']) !== null && _a !== void 0 ? _a : '';
-        if (authorization.startsWith('Bearer ') === false) {
-            return null;
-        }
-        return authorization.replace(/^Bearer\s/, '');
-    }
-    get Req() { return this.request; }
-    constructor(req) {
-        super();
+    constructor() {
+        super(...arguments);
         // *****************************************
         // Input Error Message
         // Please make changes to error messages in the subclass
@@ -69,7 +27,62 @@ class RequestType extends ReqResType_1.default {
         this.INVALID_DATE_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD" format and a valid date. ({value})';
         this.INVALID_TIME_ERROR_MESSAGE = '{property} must be a string in "hh:mi" format and a valid time. ({value})';
         this.INVALID_DATETIME_ERROR_MESSAGE = '{property} must be a string in "YYYY-MM-DD hh:mi:ss" or "YYYY-MM-DDThh:mi:ss" format and a valid date and time. ({value})';
-        this.request = req;
+    }
+    /**
+     * Throws an exception with the given code and message.
+     * If you want to perform custom processing, please change it in the subclass.
+     * 指定されたコードとメッセージで例外をスローします。
+     * 独自処理を行う場合はサブクラスで変更してください。
+     * @param {string} code - The error code. エラーコード
+     * @param {string} message - The error message. エラーメッセージ
+     */
+    throwException(code, message) {
+        throw new Error(`${code}: ${message}`);
+    }
+    get Params() {
+        var _a;
+        if (this.params === undefined) {
+            throw new Error("Request data must be set using setRequest method before accessing Req.");
+        }
+        return (_a = this.params) !== null && _a !== void 0 ? _a : {};
+    }
+    get Data() {
+        var _a;
+        if (this.data === undefined) {
+            throw new Error("Request data must be set using setRequest method before accessing Req.");
+        }
+        return (_a = this.data) !== null && _a !== void 0 ? _a : {};
+    }
+    get Headers() {
+        if (this.headers === undefined) {
+            throw new Error("Request data must be set using setRequest method before accessing Req.");
+        }
+        return this.headers;
+    }
+    get RemoteAddress() { return this.remoteAddress; }
+    get Authorization() {
+        var _a;
+        const authorization = (_a = this.Headers['authorization']) !== null && _a !== void 0 ? _a : '';
+        if (authorization.startsWith('Bearer ') === false) {
+            return null;
+        }
+        return authorization.replace(/^Bearer\s/, '');
+    }
+    setRequest(request) {
+        var _a, _b, _c;
+        this.createBody(request);
+        if (request.params !== undefined) {
+            for (const [key, value] of Object.entries(request.params)) {
+                if (key.includes("id") || key.includes("Id")) {
+                    if (this.isUUID(value) === false) {
+                        this.throwException("990", this.ErrorMessage("990", [key], value));
+                    }
+                }
+            }
+        }
+        this.params = (_a = request.params) !== null && _a !== void 0 ? _a : {};
+        this.headers = (_b = request.headers) !== null && _b !== void 0 ? _b : {};
+        this.remoteAddress = (_c = request.socket) === null || _c === void 0 ? void 0 : _c.remoteAddress;
     }
     /**
      * Generates an error message based on the provided code, keys, and value.
@@ -121,12 +134,12 @@ class RequestType extends ReqResType_1.default {
      * @param {Object} body - Request body object, リクエストボディオブジェクト
      * @throws {InputErrorException} Thrown when the input value is invalid, 入力値が不正な場合にスローされます
      */
-    createBody() {
-        if (this.request.method === 'GET' || this.request.method === 'DELETE') {
-            this.data = this.request.query;
+    createBody(request) {
+        if (request.method === 'GET' || request.method === 'DELETE') {
+            this.data = request.query;
         }
         else {
-            this.data = this.request.body;
+            this.data = request.body;
         }
         if (this.data === undefined) {
             // ここは基本通ることはないと思いますが...
@@ -135,7 +148,7 @@ class RequestType extends ReqResType_1.default {
         for (const key of Object.keys(this.properties)) {
             // NULLチェック
             if (key in this.data === false || this.data[key] === null || this.data[key] === "") {
-                if (this.properties[key].type === 'array' && ['GET', 'DELETE'].includes(this.request.method)) {
+                if (this.properties[key].type === 'array' && ['GET', 'DELETE'].includes(request.method)) {
                     // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                     // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
                     // この処理で空文字やnullが入った場合の対処をここで行う
@@ -184,7 +197,7 @@ class RequestType extends ReqResType_1.default {
                         this.setArray([key], value);
                     }
                     else {
-                        if (this.request.method === 'GET' || this.request.method === 'DELETE') {
+                        if (request.method === 'GET' || request.method === 'DELETE') {
                             // GET,DELETEメソッドの場合、?array=1&array=2で配列となるが、
                             // ?array=1のみで終わる場合は配列にならないため、直接配列にしている
                             this.data[key] = [this.convertValue(this.properties[key].properties.type, value, [key, 0])];

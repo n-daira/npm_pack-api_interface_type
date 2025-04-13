@@ -7,7 +7,7 @@ declare module 'api-interface-type' {
     export type PropertyType =  PrimitiveType | ObjectType | ArrayType;
 
     export class RequestType {
-        constructor(req: Request);
+        constructor();
 
         protected properties: { [key: string]: PropertyType; };
 
@@ -26,12 +26,12 @@ declare module 'api-interface-type' {
         public readonly INVALID_DATETIME_ERROR_MESSAGE: string;
         protected throwException(code: string, message: string): never;
 
+        public setRequest(request: Request): void;
         get Data(): { [key: string]: any };
         get Headers(): IncomingHttpHeaders;
         get Params(): { [key: string]: any };
         get RemoteAddress(): string | undefined;
         get Authorization(): string | null;
-        get Req(): Request;
 
         public createSwagger(method: string): string;
     }

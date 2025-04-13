@@ -23,9 +23,9 @@ const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage
         }
 
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
             try {
-                instance.Data.arr; // access and cause an error;
+                instance.setRequest(TestUtils.createMockRequest(method, param));
                 fail("fali test");
             } catch (error) {
                 expect(error).toBeDefined(); // confirm that occured error
@@ -37,54 +37,54 @@ const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage
 }
 
 // instance for error message
-const r = new TestRequestType({} as Request);
+const r = new TestRequestType();
 
-// describe('input error check unnecessary input', () => {
-//     const param = {arr: [], aaa: true}
-//     for (const method of TestUtils.METHODS) {
-//         it (`${method} method`, () => {
-//             const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
-//             try {
-//                 instance.Data.arr; // access and cause an error;
-//                 fail("fali test");
-//             } catch (error) {
-//                 expect(error).toBeDefined(); // confirm that occured error
-//                 const message = ((error as unknown) as any).message;
-//                 expect(message).toBe(`004: ${instance.UNNECESSARY_INPUT_ERROR_MESSAGE.replace("{property}", "aaa")}`);
-//             }
-//         })
-//     }
-// })
+describe('input error check unnecessary input', () => {
+    const param = {arr: [], aaa: true}
+    for (const method of TestUtils.METHODS) {
+        it (`${method} method`, () => {
+            const instance = new TestRequestType();
+            try {
+                instance.setRequest(TestUtils.createMockRequest(method, param));
+                fail("fali test");
+            } catch (error) {
+                expect(error).toBeDefined(); // confirm that occured error
+                const message = ((error as unknown) as any).message;
+                expect(message).toBe(`004: ${instance.UNNECESSARY_INPUT_ERROR_MESSAGE.replace("{property}", "aaa")}`);
+            }
+        })
+    }
+})
 
-// describe('input error check fail input', () => {
-//     describe('input number 2', () => {
-//         errorCheck({arr: 2}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "2");
-//     });
+describe('input error check fail input', () => {
+    describe('input number 2', () => {
+        errorCheck({arr: 2}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "2");
+    });
 
-//     describe('input string', () => {
-//         errorCheck({arr: "strval"}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "strval");
-//     });
+    describe('input string', () => {
+        errorCheck({arr: "strval"}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "strval");
+    });
 
-//     describe('input boolean true', () => {
-//         errorCheck({arr: true}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "true");
-//     });
+    describe('input boolean true', () => {
+        errorCheck({arr: true}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "true");
+    });
 
-//     describe('input boolean false', () => {
-//         errorCheck({arr: false}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "false");
-//     });
+    describe('input boolean false', () => {
+        errorCheck({arr: false}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "false");
+    });
 
-//     describe('input object', () => {
-//         errorCheck({arr: {key: "strval"}}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "[object Object]");
-//     });
+    describe('input object', () => {
+        errorCheck({arr: {key: "strval"}}, "003", r.INVALID_ARRAY_ERROR_MESSAGE, "[object Object]");
+    });
 
-//     describe('input array object', () => {
-//         errorCheck({arr: [{key: "strval"}]}, "221", r.INVALID_STRING_ERROR_MESSAGE, "[object Object]", 0);
-//     });
+    describe('input array object', () => {
+        errorCheck({arr: [{key: "strval"}]}, "221", r.INVALID_STRING_ERROR_MESSAGE, "[object Object]", 0);
+    });
 
-//     describe('input array bool 2nd', () => {
-//         errorCheck({arr: ["strval", true]}, "221", r.INVALID_STRING_ERROR_MESSAGE, "true", 1);
-//     });
-// });
+    describe('input array bool 2nd', () => {
+        errorCheck({arr: ["strval", true]}, "221", r.INVALID_STRING_ERROR_MESSAGE, "true", 1);
+    });
+});
 
 // ********************************************************
 // * success test
@@ -95,7 +95,8 @@ const successCheck = (param: {[key: string]: any}, toBe: Array<any> | null, isFo
             if (isFormatOneIndex && ['GET', 'DELETE'].includes(method) && param.arr.length === 1) {
                 param = {arr: param.arr[0]};
             }
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
+            instance.setRequest(TestUtils.createMockRequest(method, param));
             if (toBe === null) {
                 expect(instance.Data.arr).toBe(toBe);
             } else {
@@ -111,7 +112,8 @@ const successCheck = (param: {[key: string]: any}, toBe: Array<any> | null, isFo
 const successCheckEmpty = (param: {[key: string]: any}, toBe: any) => {
     for (const method of TestUtils.METHODS) {
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
+            instance.setRequest(TestUtils.createMockRequest(method, param));
             expect(instance.Data.arr).toBe(toBe);
         })
     }

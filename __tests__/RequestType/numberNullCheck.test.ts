@@ -18,9 +18,9 @@ class TestRequestType extends RequestType {
 const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage: string, errorValue: string) => {
     for (const method of TestUtils.METHODS) {
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
             try {
-                instance.Data.num; // access and cause an error;
+                instance.setRequest(TestUtils.createMockRequest(method, param));
                 fail("fali test");
             } catch (error) {
                 expect(error).toBeDefined(); // confirm that occured error
@@ -32,15 +32,15 @@ const errorCheck = (param: {[key: string]: any}, errorCode: string, errorMessage
 }
 
 // instance for error message
-const r = new TestRequestType({} as Request);
+const r = new TestRequestType();
 
 describe('input error check unnecessary input', () => {
     const param = {aaa: -100}
     for (const method of TestUtils.METHODS) {
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
             try {
-                instance.Data.num; // access and cause an error;
+                instance.setRequest(TestUtils.createMockRequest(method, param));
                 fail("fali test");
             } catch (error) {
                 expect(error).toBeDefined(); // confirm that occured error
@@ -80,7 +80,8 @@ describe('input error check', () => {
 const successCheck = (param: {[key: string]: any}, toBe: any) => {
     for (const method of TestUtils.METHODS) {
         it (`${method} method`, () => {
-            const instance = new TestRequestType(TestUtils.createMockRequest(method, param));
+            const instance = new TestRequestType();
+            instance.setRequest(TestUtils.createMockRequest(method, param));
             expect(instance.Data.num).toBe(toBe);
         })
     }
